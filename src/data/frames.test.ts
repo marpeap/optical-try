@@ -17,4 +17,11 @@ describe("frames", () => {
       expect(frame.images.length).toBeGreaterThan(0);
     }
   });
+
+  it("chaque monture a un modele3dUrl défini", () => {
+    for (const frame of frames) {
+      expect(frame.modele3dUrl).toBeTruthy();
+      expect(frame.modele3dUrl).toMatch(/^\/models\/frames\/.+\.glb$/);
+    }
+  });
 });

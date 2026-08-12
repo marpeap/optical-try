@@ -11,6 +11,7 @@ export const frames: Frame[] = [
     genre: "mixte",
     prix: 29,
     images: ["/images/frames/orea-noire-1.jpg"],
+    modele3dUrl: "/models/frames/orea-noire.glb",
     classeSante: "A",
   },
   {
@@ -23,6 +24,7 @@ export const frames: Frame[] = [
     genre: "femme",
     prix: 89,
     images: ["/images/frames/orea-ecaille-1.jpg"],
+    modele3dUrl: "/models/frames/orea-ecaille.glb",
     classeSante: "B",
   },
   {
@@ -35,6 +37,7 @@ export const frames: Frame[] = [
     genre: "homme",
     prix: 129,
     images: ["/images/frames/vireo-titane-1.jpg"],
+    modele3dUrl: "/models/frames/vireo-titane.glb",
     classeSante: "B",
   },
   {
@@ -47,6 +50,7 @@ export const frames: Frame[] = [
     genre: "femme",
     prix: 25,
     images: ["/images/frames/vireo-corail-1.jpg"],
+    modele3dUrl: "/models/frames/vireo-corail.glb",
     classeSante: "A",
   },
   {
@@ -59,6 +63,7 @@ export const frames: Frame[] = [
     genre: "mixte",
     prix: 69,
     images: ["/images/frames/brume-bleu-nuit-1.jpg"],
+    modele3dUrl: "/models/frames/brume-bleu-nuit.glb",
     classeSante: "B",
   },
   {
@@ -71,6 +76,7 @@ export const frames: Frame[] = [
     genre: "mixte",
     prix: 28,
     images: ["/images/frames/brume-verte-1.jpg"],
+    modele3dUrl: "/models/frames/brume-verte.glb",
     classeSante: "A",
   },
 ];
