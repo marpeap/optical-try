@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Frame sequences vidéo générées (régénérables via scripts/generate-video-frames.sh)
+public/video-frames/desktop/*.jpg
+public/video-frames/mobile/*.jpg
+scripts/.raw-clips/
