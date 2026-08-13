@@ -1,0 +1,11 @@
+.shell {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.progress {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  margin-bottom: 24px;
+}
