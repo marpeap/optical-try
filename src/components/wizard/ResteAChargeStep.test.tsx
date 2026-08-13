@@ -24,9 +24,11 @@ describe("ResteAChargeStep", () => {
   it("affiche le reste à charge calculé et redirige vers paiement au clic", () => {
     render(<ResteAChargeStep />);
 
-    expect(screen.getByRole("heading", { name: /reste à charge/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /ce qui reste à votre charge/i })
+    ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /continuer/i }));
+    fireEvent.click(screen.getByRole("button", { name: /payer/i }));
 
     expect(mockPush).toHaveBeenCalledWith("/commande/paiement");
     expect(loadWizardState()?.resteACharge).not.toBeNull();

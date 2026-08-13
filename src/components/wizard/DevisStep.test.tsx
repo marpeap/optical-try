@@ -21,7 +21,9 @@ describe("DevisStep", () => {
 
     expect(screen.getByText(new RegExp(`${frames[0].prix}\\s*€`))).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /continuer/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /poursuivre avec ma monture/i })
+    );
 
     expect(mockPush).toHaveBeenCalledWith("/commande/reste-a-charge");
     expect(loadWizardState()?.devis).not.toBeNull();

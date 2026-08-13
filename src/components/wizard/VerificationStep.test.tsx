@@ -27,7 +27,9 @@ describe("VerificationStep", () => {
 
     expect(screen.getByDisplayValue("-1.5")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /valider/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /ces valeurs sont exactes/i })
+    );
 
     expect(mockPush).toHaveBeenCalledWith("/commande/infos-perso");
   });

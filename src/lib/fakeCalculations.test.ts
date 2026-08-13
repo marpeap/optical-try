@@ -1,10 +1,19 @@
 import { describe, it, expect } from "vitest";
-import { computeDevis, computeResteACharge } from "./fakeCalculations";
+import {
+  computeDevis,
+  computeResteACharge,
+  equipement100Sante,
+} from "./fakeCalculations";
 import { frames } from "@/data/frames";
 import type { Mutuelle } from "./wizardState";
 
+const responsable: Mutuelle = {
+  nom: "Test Mutuelle",
+  niveauCouverture: "responsable",
+};
+
 describe("computeDevis", () => {
-  it("calcule un devis avec prix monture + prix verres forfaitaire", () => {
+  it("additionne la monture et les verres", () => {
     const frame = frames[0];
     const devis = computeDevis(frame);
     expect(devis.prixMonture).toBe(frame.prix);
@@ -14,41 +23,70 @@ describe("computeDevis", () => {
 });
 
 describe("computeResteACharge", () => {
-  it("classe A avec mutuelle responsable : reste à charge nul", () => {
-    const frameClasseA = frames.find((f) => f.classeSante === "A")!;
-    const devis = computeDevis(frameClasseA);
-    const mutuelle: Mutuelle = { nom: "Test Mutuelle", niveauCouverture: "responsable" };
-
-    const resteACharge = computeResteACharge(devis, frameClasseA, mutuelle);
-
-    expect(resteACharge.montant).toBe(0);
-    expect(resteACharge.detailClasse).toBe("A");
-  });
-
-  it("classe B : reste à charge strictement positif même avec mutuelle responsable", () => {
-    const frameClasseB = frames.find((f) => f.classeSante === "B")!;
-    const devis = computeDevis(frameClasseB);
-    const mutuelle: Mutuelle = { nom: "Test Mutuelle", niveauCouverture: "responsable" };
-
-    const resteACharge = computeResteACharge(devis, frameClasseB, mutuelle);
+  it("laisse un reste à charge positif sur un équipement classe B", () => {
+    const frame = frames.find((f) => f.classeSante === "B")!;
+    const resteACharge = computeResteACharge(
+      computeDevis(frame),
+      frame,
+      responsable
+    );
 
     expect(resteACharge.montant).toBeGreaterThan(0);
     expect(resteACharge.detailClasse).toBe("B");
   });
 
-  it("classe B avec mutuelle basique : reste à charge plus élevé qu'avec mutuelle premium", () => {
-    const frameClasseB = frames.find((f) => f.classeSante === "B")!;
-    const devis = computeDevis(frameClasseB);
+  it("laisse un reste à charge plus faible avec une meilleure couverture", () => {
+    const frame = frames.find((f) => f.classeSante === "B")!;
+    const devis = computeDevis(frame);
 
-    const avecBasique = computeResteACharge(devis, frameClasseB, {
+    const basique = computeResteACharge(devis, frame, {
       nom: "Test",
       niveauCouverture: "basique",
     });
-    const avecPremium = computeResteACharge(devis, frameClasseB, {
+    const premium = computeResteACharge(devis, frame, {
       nom: "Test",
       niveauCouverture: "premium",
     });
 
-    expect(avecBasique.montant).toBeGreaterThan(avecPremium.montant);
+    expect(basique.montant).toBeGreaterThan(premium.montant);
+  });
+
+  it("plafonne la prise en charge de la monture à 100 € (contrat responsable)", () => {
+    const chere = frames.find((f) => f.prix > 300)!;
+    const abordable = { ...chere, prix: 100 };
+
+    const resteChere = computeResteACharge(
+      computeDevis(chere),
+      chere,
+      responsable
+    );
+    const resteAbordable = computeResteACharge(
+      computeDevis(abordable),
+      abordable,
+      responsable
+    );
+
+    /* Au-delà du plafond, chaque euro supplémentaire de monture reste
+       intégralement à la charge du client. */
+    const ecartPrix = chere.prix - abordable.prix;
+    expect(resteChere.montant - resteAbordable.montant).toBeCloseTo(ecartPrix, 2);
+  });
+
+  it("annule le reste à charge sur un équipement classe A", () => {
+    const frame = { ...frames[0], classeSante: "A" as const };
+    const resteACharge = computeResteACharge(
+      computeDevis(frame),
+      frame,
+      responsable
+    );
+
+    expect(resteACharge.montant).toBe(0);
+    expect(resteACharge.detailClasse).toBe("A");
+  });
+});
+
+describe("equipement100Sante", () => {
+  it("est toujours à reste à charge nul", () => {
+    expect(equipement100Sante().resteACharge).toBe(0);
   });
 });

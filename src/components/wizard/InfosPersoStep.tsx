@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadWizardState, saveWizardState } from "@/lib/wizardState";
+import { Button } from "@/components/ui/Button";
+import { Field, TextInput, StepHeading } from "./WizardField";
 
 export function InfosPersoStep() {
   const router = useRouter();
@@ -10,29 +12,62 @@ export function InfosPersoStep() {
   const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
 
+  const complet = nom.trim() && prenom.trim() && email.trim();
+
   function handleContinuer() {
     const state = loadWizardState();
-    if (state) {
-      saveWizardState({ ...state, infosPerso: { nom, prenom, email } });
-    }
+    if (state) saveWizardState({ ...state, infosPerso: { nom, prenom, email } });
     router.push("/commande/mutuelle");
   }
 
   return (
     <div>
-      <h1>Vos informations</h1>
-      <label htmlFor="nom">Nom</label>
-      <input id="nom" value={nom} onChange={(e) => setNom(e.target.value)} />
+      <StepHeading
+        title="Vos coordonnées"
+        intro="Elles servent au suivi de commande et à l'envoi de votre devis."
+      />
 
-      <label htmlFor="prenom">Prénom</label>
-      <input id="prenom" value={prenom} onChange={(e) => setPrenom(e.target.value)} />
+      <div className="grid gap-5">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field id="prenom" label="Prénom">
+            <TextInput
+              id="prenom"
+              autoComplete="given-name"
+              value={prenom}
+              onChange={(e) => setPrenom(e.target.value)}
+            />
+          </Field>
 
-      <label htmlFor="email">Email</label>
-      <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Field id="nom" label="Nom">
+            <TextInput
+              id="nom"
+              autoComplete="family-name"
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+            />
+          </Field>
+        </div>
 
-      <button type="button" onClick={handleContinuer}>
-        Continuer
-      </button>
+        <Field
+          id="email"
+          label="Email"
+          hint="Votre devis normalisé y sera envoyé."
+        >
+          <TextInput
+            id="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </Field>
+      </div>
+
+      <div className="mt-8">
+        <Button size="lg" onClick={handleContinuer} disabled={!complet}>
+          Continuer
+        </Button>
+      </div>
     </div>
   );
 }

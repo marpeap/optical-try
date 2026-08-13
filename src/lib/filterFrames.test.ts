@@ -19,14 +19,15 @@ describe("filterFrames", () => {
   });
 
   it("filtre par prix maximum", () => {
-    const result = filterFrames(frames, { prixMax: 30 });
-    expect(result.every((f) => f.prix <= 30)).toBe(true);
+    const result = filterFrames(frames, { prixMax: 170 });
+    expect(result.every((f) => f.prix <= 170)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
   });
 
   it("combine plusieurs filtres", () => {
-    const result = filterFrames(frames, { genre: "mixte", prixMax: 30 });
-    expect(result.every((f) => f.genre === "mixte" && f.prix <= 30)).toBe(true);
+    const result = filterFrames(frames, { genre: "mixte", prixMax: 170 });
+    expect(result.every((f) => f.genre === "mixte" && f.prix <= 170)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
   });
 
   it("retourne un tableau vide si aucune monture ne correspond", () => {

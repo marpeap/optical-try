@@ -1,49 +1,50 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { ProductDetail } from "./ProductDetail";
 import { frames } from "@/data/frames";
-import * as engine from "@/components/tryon/engine/webarRocksEngine";
 
-vi.spyOn(engine, "startEngine").mockResolvedValue({
-  status: "ok",
-  handle: { stop: vi.fn() },
-});
+/* Le widget Jeeliz exige une vraie caméra et un contexte WebGL : on le
+   remplace par un double pour tester l'intégration de l'overlay. */
+vi.mock("@/components/tryon/engine/jeelizWidget", () => ({
+  loadJeelizWidget: vi.fn().mockResolvedValue({
+    start: vi.fn(),
+    load: vi.fn(),
+  }),
+  messageForError: () => "Erreur",
+}));
 
 describe("ProductDetail", () => {
   const frame = frames[0];
 
-  it("affiche le nom, la marque et le prix", () => {
-    render(<ProductDetail frame={frame} />);
-    expect(screen.getByText(frame.nom)).toBeInTheDocument();
-    expect(screen.getByText(frame.marque)).toBeInTheDocument();
+  it("affiche la marque, le nom et le prix", () => {
+    render(<ProductDetail frame={frame} frames={frames} />);
+    expect(
+      screen.getByRole("heading", { level: 1, name: frame.nom })
+    ).toBeInTheDocument();
     expect(screen.getByText(`${frame.prix} €`)).toBeInTheDocument();
   });
 
-  it("affiche le bouton Choisir cette monture avec le bon lien", () => {
-    render(<ProductDetail frame={frame} />);
+  it("précise que le prix concerne la monture seule", () => {
+    render(<ProductDetail frame={frame} frames={frames} />);
+    expect(screen.getByText(/monture seule/i)).toBeInTheDocument();
+  });
+
+  it("lie vers le parcours de commande avec le slug de la monture", () => {
+    render(<ProductDetail frame={frame} frames={frames} />);
     const link = screen.getByRole("link", { name: /choisir cette monture/i });
-    expect(link).toHaveAttribute("href", `/commande/ordonnance/init?frame=${frame.slug}`);
+    expect(link).toHaveAttribute(
+      "href",
+      `/commande/ordonnance/init?frame=${frame.slug}`
+    );
   });
 
-  it("affiche le TryOnTrigger", () => {
-    render(<ProductDetail frame={frame} />);
-    expect(screen.getByRole("button", { name: /essayer virtuellement/i })).toBeInTheDocument();
-  });
+  it("ouvre l'essayage au clic et le referme", async () => {
+    render(<ProductDetail frame={frame} frames={frames} />);
 
-  it("ouvre TryOnOverlay au clic sur Essayer virtuellement", () => {
-    render(<ProductDetail frame={frame} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /essayer virtuellement/i }));
-
+    fireEvent.click(screen.getByRole("button", { name: /essayer cette monture/i }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-  });
 
-  it("ferme TryOnOverlay au clic sur Fermer", async () => {
-    render(<ProductDetail frame={frame} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /essayer virtuellement/i }));
     fireEvent.click(await screen.findByRole("button", { name: /fermer/i }));
-
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

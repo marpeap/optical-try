@@ -1,22 +1,46 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Frame } from "@/lib/types";
-import styles from "./ProductCard.module.css";
 
-export function ProductCard({ frame }: { frame: Frame }) {
+/*
+  Visuel produit : aucune photographie sous licence n'est disponible pour ces
+  montures. Plutôt qu'une fausse photo générique, la vignette assume un
+  traitement typographique sur la teinte réelle de la monture. L'essayage
+  fournit l'image véritable du produit.
+*/
+export function ProductCard({
+  frame,
+  priority = false,
+}: {
+  frame: Frame;
+  priority?: boolean;
+}) {
   return (
-    <Link href={`/catalogue/${frame.slug}`} className={styles.card}>
-      <Image
-        src={frame.images[0]}
-        alt={frame.nom}
-        width={320}
-        height={200}
-        className={styles.image}
-      />
-      <div className={styles.info}>
-        <p className={styles.marque}>{frame.marque}</p>
-        <h3 className={styles.nom}>{frame.nom}</h3>
-        <p className={styles.prix}>{frame.prix} €</p>
+    <Link
+      href={`/catalogue/${frame.slug}`}
+      className="group block focus-visible:outline-none"
+    >
+      <div
+        className="relative flex aspect-[4/3] items-end overflow-hidden rounded-[var(--radius-card)] p-6 transition-transform duration-300 ease-out group-hover:-translate-y-1"
+        style={{ backgroundColor: frame.couleurHex }}
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-white/10"
+        />
+        <p className="relative text-[2rem] font-semibold leading-none tracking-[-0.03em] text-white/95">
+          {frame.nom}
+        </p>
+        <span className="absolute right-5 top-5 rounded-full bg-black/35 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+          {frame.forme}
+        </span>
+      </div>
+
+      <div className="mt-4 flex items-baseline justify-between gap-4">
+        <div>
+          <p className="text-sm text-[var(--ink-muted)]">{frame.marque}</p>
+          <p className="mt-0.5 font-medium">{frame.couleur}</p>
+        </div>
+        <p className="font-medium tabular-nums">{`${frame.prix} €`}</p>
       </div>
     </Link>
   );
