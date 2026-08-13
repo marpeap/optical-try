@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Frame } from "@/lib/types";
 import { TryOnTrigger } from "./TryOnTrigger";
+import { TryOnOverlay } from "@/components/tryon/TryOnOverlay";
 
 export function ProductDetail({ frame }: { frame: Frame }) {
   const [tryOnOpen, setTryOnOpen] = useState(false);
@@ -19,10 +20,7 @@ export function ProductDetail({ frame }: { frame: Frame }) {
       <p>Couleur : {frame.couleur}</p>
 
       <TryOnTrigger frame={frame} onOpen={() => setTryOnOpen(true)} />
-      {/* TryOnOverlay est monté ici quand tryOnOpen est vrai — branché par le plan "Essayage virtuel" */}
-      {tryOnOpen && (
-        <p role="status">Essayage virtuel bientôt disponible (composant en cours de construction).</p>
-      )}
+      {tryOnOpen && <TryOnOverlay frame={frame} onClose={() => setTryOnOpen(false)} />}
 
       <Link href={`/commande/ordonnance/init?frame=${frame.slug}`}>Choisir cette monture</Link>
     </article>

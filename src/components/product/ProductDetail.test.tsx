@@ -1,7 +1,13 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ProductDetail } from "./ProductDetail";
 import { frames } from "@/data/frames";
+import * as engine from "@/components/tryon/engine/webarRocksEngine";
+
+vi.spyOn(engine, "startEngine").mockResolvedValue({
+  status: "ok",
+  handle: { stop: vi.fn() },
+});
 
 describe("ProductDetail", () => {
   const frame = frames[0];
@@ -22,5 +28,22 @@ describe("ProductDetail", () => {
   it("affiche le TryOnTrigger", () => {
     render(<ProductDetail frame={frame} />);
     expect(screen.getByRole("button", { name: /essayer virtuellement/i })).toBeInTheDocument();
+  });
+
+  it("ouvre TryOnOverlay au clic sur Essayer virtuellement", () => {
+    render(<ProductDetail frame={frame} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /essayer virtuellement/i }));
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("ferme TryOnOverlay au clic sur Fermer", async () => {
+    render(<ProductDetail frame={frame} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /essayer virtuellement/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /fermer/i }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });
