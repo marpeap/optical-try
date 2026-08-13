@@ -18,6 +18,7 @@ export const frames: Frame[] = [
     genre: "mixte",
     prix: 159,
     sku: "rayban_wayfarer_havane_vert",
+    photos: [],
     description:
       "Le profil trapèze dessiné en 1952. L'acétate havane adoucit une monture qui reste franche.",
     classeSante: "B",
@@ -34,6 +35,7 @@ export const frames: Frame[] = [
     genre: "mixte",
     prix: 175,
     sku: "rayban_clubmaster_noir_bleuGris",
+    photos: [],
     description:
       "Barre sourcilière épaisse, cerclage inférieur en métal fin. Structure le haut du visage.",
     classeSante: "B",
@@ -50,6 +52,7 @@ export const frames: Frame[] = [
     genre: "mixte",
     prix: 149,
     sku: "rayban_round_or_vert",
+    photos: [],
     description:
       "Cercle parfait sur monture métal fine. Adoucit les traits anguleux, marque les traits doux.",
     classeSante: "B",
@@ -66,6 +69,7 @@ export const frames: Frame[] = [
     genre: "mixte",
     prix: 165,
     sku: "rayban_aviator_or_vertFlash",
+    photos: [],
     description:
       "Goutte inversée et double pont, dessinée pour les pilotes en 1937. Convient aux visages larges.",
     classeSante: "B",
@@ -82,6 +86,7 @@ export const frames: Frame[] = [
     genre: "homme",
     prix: 245,
     sku: "persol_PO0649_havana_brown",
+    photos: [],
     description:
       "Dessinée à Turin pour les conducteurs de tramway. La flèche sur les branches est sa signature.",
     classeSante: "B",
@@ -98,6 +103,7 @@ export const frames: Frame[] = [
     genre: "mixte",
     prix: 390,
     sku: "mykita_black",
+    photos: [],
     description:
       "Feuille de titane pliée sans vis ni soudure. 18 grammes, atelier de Berlin.",
     classeSante: "B",
@@ -114,6 +120,7 @@ export const frames: Frame[] = [
     genre: "femme",
     prix: 310,
     sku: "gucci_havana_green",
+    photos: [],
     description:
       "Acétate épais teinté dans la masse, tempes larges. Présence assumée sans excès de logo.",
     classeSante: "B",

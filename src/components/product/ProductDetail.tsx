@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Camera } from "@phosphor-icons/react/dist/ssr/Camera";
 import type { Frame } from "@/lib/types";
 import { TryOnOverlay } from "@/components/tryon/TryOnOverlay";
+import { FrameVisual } from "@/components/catalogue/FrameVisual";
 import { ButtonLink } from "@/components/ui/Button";
 
 export function ProductDetail({
@@ -29,20 +31,29 @@ export function ProductDetail({
   return (
     <>
       <div className="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
-        <div
-          className="relative flex aspect-[4/5] items-end overflow-hidden rounded-[var(--radius-card)] p-8 lg:aspect-auto lg:min-h-[560px]"
-          style={{ backgroundColor: frame.couleurHex }}
-        >
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-white/10"
-          />
-          <div className="relative">
-            <p className="text-sm text-white/70">{frame.marque}</p>
-            <p className="mt-1 text-[2.75rem] font-semibold leading-none tracking-[-0.03em] text-white">
-              {frame.nom}
-            </p>
-          </div>
+        <div className="grid gap-4">
+          <FrameVisual frame={frame} taille="fiche" priority />
+
+          {/* Vues secondaires dès qu'elles sont fournies. */}
+          {frame.photos.length > 1 && (
+            <div className="grid grid-cols-3 gap-4">
+              {frame.photos.slice(1, 4).map((photo) => (
+                <div
+                  key={photo}
+                  className="relative aspect-square overflow-hidden rounded-[var(--radius-card)]"
+                  style={{ backgroundColor: frame.couleurHex }}
+                >
+                  <Image
+                    src={photo}
+                    alt={`${frame.marque} ${frame.nom}, autre vue`}
+                    fill
+                    sizes="(max-width: 1024px) 30vw, 15vw"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="lg:pt-6">

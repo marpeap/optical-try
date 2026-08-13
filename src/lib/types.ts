@@ -17,6 +17,13 @@ export type Frame = {
   prix: number;
   /** SKU du modèle 3D dans la GlassesDB Jeeliz, consommé par le try-on. */
   sku: string;
+  /**
+   * Photos produit, dans l'ordre d'affichage. Chemins publics
+   * (ex. "/images/frames/rayban-wayfarer-havane.jpg").
+   * Vide tant qu'aucune photo n'est fournie : l'interface retombe alors sur
+   * un panneau teinté. Voir public/images/frames/README.md.
+   */
+  photos: string[];
   /** Une phrase sur le caractère de la monture. Pas de remplissage marketing. */
   description: string;
   classeSante: ClasseSante;
