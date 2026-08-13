@@ -30,15 +30,18 @@ export function ProductCard({
         <p className="relative text-[2rem] font-semibold leading-none tracking-[-0.03em] text-white/95">
           {frame.nom}
         </p>
-        <span className="absolute right-5 top-5 rounded-full bg-black/35 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-          {frame.forme}
-        </span>
       </div>
 
       <div className="mt-4 flex items-baseline justify-between gap-4">
         <div>
           <p className="text-sm text-[var(--ink-muted)]">{frame.marque}</p>
-          <p className="mt-0.5 font-medium">{frame.couleur}</p>
+          <p className="mt-0.5 font-medium">
+            {frame.couleur}
+            <span className="px-1.5 text-[var(--ink-subtle)]">·</span>
+            <span className="font-normal text-[var(--ink-muted)]">
+              {frame.forme}
+            </span>
+          </p>
         </div>
         <p className="font-medium tabular-nums">{`${frame.prix} €`}</p>
       </div>

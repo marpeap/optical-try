@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LockSimple } from "@phosphor-icons/react";
+import { LockSimple } from "@phosphor-icons/react/dist/ssr/LockSimple";
 import { loadWizardState, saveWizardState } from "@/lib/wizardState";
 import { Button } from "@/components/ui/Button";
 import { Field, TextInput, StepHeading } from "./WizardField";

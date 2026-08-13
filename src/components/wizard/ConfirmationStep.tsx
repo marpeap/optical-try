@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check } from "@phosphor-icons/react";
+import { Check } from "@phosphor-icons/react/dist/ssr/Check";
 import { clearWizardState, loadWizardState, type WizardState } from "@/lib/wizardState";
 import { Button } from "@/components/ui/Button";
 

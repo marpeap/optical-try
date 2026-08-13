@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Camera } from "@phosphor-icons/react";
+import { Camera } from "@phosphor-icons/react/dist/ssr/Camera";
 import type { Frame } from "@/lib/types";
 import { TryOnOverlay } from "@/components/tryon/TryOnOverlay";
 import { ButtonLink } from "@/components/ui/Button";

@@ -22,7 +22,7 @@ const variants: Record<Variant, string> = {
   primary:
     "bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)]",
   secondary:
-    "border border-[var(--line)] bg-[var(--surface-raised)] text-[var(--ink)] hover:border-[var(--ink-subtle)]",
+    "border border-[var(--ink-subtle)] bg-transparent text-[var(--ink)] hover:border-[var(--ink)] hover:bg-[var(--surface-raised)]",
   ghost: "text-[var(--ink)] hover:bg-[var(--surface-sunken)]",
 };
 

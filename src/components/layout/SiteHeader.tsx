@@ -1,41 +1,92 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ButtonLink } from "@/components/ui/Button";
+import { usePathname } from "next/navigation";
 
 const NAV = [
   { href: "/catalogue", label: "Montures" },
-  { href: "/catalogue?tri=essayage", label: "Essayage" },
   { href: "/prise-en-charge", label: "Prise en charge" },
 ];
 
+/*
+  Sur la landing, le hero est une vidéo plein cadre : le bandeau se fond
+  dedans en blanc, puis reprend le fond du site dès qu'on quitte le hero.
+  La bascule passe par un observateur d'intersection, pas par un écouteur
+  de scroll (qui se déclencherait à chaque frame).
+*/
 export function SiteHeader() {
+  const pathname = usePathname();
+  const surHero = pathname === "/";
+  const [enHaut, setEnHaut] = useState(true);
+
+  useEffect(() => {
+    if (!surHero) {
+      setEnHaut(false);
+      return;
+    }
+    setEnHaut(true);
+
+    /* Le hero expose une zone repère couvrant toute sa hauteur. Tant qu'une
+       partie reste visible, la vidéo est à l'écran et le bandeau doit rester
+       transparent. Pas d'écouteur de scroll : un observateur suffit. */
+    const cible = document.getElementById("hero-sentinelle");
+    if (!cible) return;
+
+    const observer = new IntersectionObserver(([entry]) =>
+      setEnHaut(entry.isIntersecting)
+    );
+    observer.observe(cible);
+    return () => observer.disconnect();
+  }, [surHero]);
+
+  const transparent = surHero && enHaut;
+
   return (
-    <header className="sticky top-0 z-40 h-16 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--surface)_88%,transparent)] backdrop-blur-md">
-      <div className="mx-auto flex h-full max-w-[1400px] items-center gap-8 px-6">
-        <Link
-          href="/"
-          className="text-[1.0625rem] font-semibold tracking-[-0.02em]"
-        >
-          Alves
-        </Link>
+    <>
+      <header
+        className={`sticky top-0 z-40 h-16 transition-colors duration-300 ${
+          transparent
+            ? "border-b border-transparent text-white"
+            : "border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--surface)_88%,transparent)] text-[var(--ink)] backdrop-blur-md"
+        }`}
+      >
+        <div className="mx-auto flex h-full max-w-[1400px] items-center gap-8 px-6">
+          <Link
+            href="/"
+            className="text-[1.0625rem] font-semibold tracking-[-0.02em]"
+          >
+            Alves
+          </Link>
 
-        <nav className="hidden flex-1 items-center gap-7 md:flex">
-          {NAV.map((item) => (
+          <nav className="hidden flex-1 items-center gap-7 md:flex">
+            {NAV.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-sm transition-colors ${
+                  transparent
+                    ? "text-white/75 hover:text-white"
+                    : "text-[var(--ink-muted)] hover:text-[var(--ink)]"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Sur la landing, le hero porte déjà l'appel à l'action principal :
+              le bandeau n'en ajoute pas un second au libellé identique. */}
+          {!surHero && (
             <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+              href="/catalogue"
+              className="ml-auto inline-flex h-10 items-center rounded-full bg-[var(--accent)] px-5 text-sm font-medium text-[var(--accent-ink)] transition-colors hover:bg-[var(--accent-hover)] md:ml-0"
             >
-              {item.label}
+              Voir les montures
             </Link>
-          ))}
-        </nav>
-
-        <div className="ml-auto md:ml-0">
-          <ButtonLink href="/catalogue" size="md">
-            Voir les montures
-          </ButtonLink>
+          )}
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UploadSimple } from "@phosphor-icons/react";
+import { UploadSimple } from "@phosphor-icons/react/dist/ssr/UploadSimple";
 import { simulateOcr } from "@/lib/fakeOcr";
 import { loadWizardState, saveWizardState } from "@/lib/wizardState";
 import { StepHeading } from "./WizardField";

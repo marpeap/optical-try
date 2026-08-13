@@ -134,15 +134,25 @@ export function ScrollVideoHero() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative h-[320vh]">
+    /* -mt-16 : la vidéo remonte sous le bandeau, qui est transparent ici. */
+    <section ref={sectionRef} className="relative -mt-16 h-[320vh]">
+      {/* Repère lu par le bandeau : tant qu'il est à l'écran, la vidéo occupe
+          le cadre et le bandeau reste transparent. */}
+      <div
+        id="hero-sentinelle"
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+      />
+
       <div className="sticky top-0 h-[100dvh] overflow-hidden">
         <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
 
         {/* Voile porteur de contraste : garantit la lisibilité AA du texte
-            quelle que soit la frame affichée derrière. */}
+            quelle que soit la frame affichée derrière. Vertical sur mobile
+            (le texte occupe toute la largeur), latéral à partir de md. */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent"
+          className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/25 md:bg-gradient-to-r md:from-black/80 md:via-black/45 md:to-transparent"
         />
 
         <div className="relative mx-auto flex h-full max-w-[1400px] items-center px-6">
