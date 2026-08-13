@@ -9,7 +9,9 @@ vi.mock("@/components/tryon/engine/jeelizWidget", () => ({
   loadJeelizWidget: vi.fn().mockResolvedValue({
     start: vi.fn(),
     load: vi.fn(),
+    destroy: vi.fn().mockResolvedValue(undefined),
   }),
+  enfilerOperation: (operation: () => Promise<unknown>) => operation(),
   messageForError: () => "Erreur",
 }));
 

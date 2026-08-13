@@ -14,19 +14,22 @@ export function ProductCard({
       href={`/catalogue/${frame.slug}`}
       className="group block focus-visible:outline-none"
     >
-      <div className="transition-transform duration-300 ease-out group-hover:-translate-y-1">
-        <FrameVisual frame={frame} priority={priority} />
-      </div>
+      <FrameVisual frame={frame} priority={priority} />
 
+      {/* Le nom du modèle doit rester lisible sur la carte : avec une photo,
+          il n'apparaît plus dans le visuel, seulement dans son texte de
+          remplacement. */}
       <div className="mt-4 flex items-baseline justify-between gap-4">
         <div>
           <p className="text-sm text-[var(--ink-muted)]">{frame.marque}</p>
-          <p className="mt-0.5 font-medium">
-            {frame.couleur}
-            <span className="px-1.5 text-[var(--ink-subtle)]">·</span>
-            <span className="font-normal text-[var(--ink-muted)]">
-              {frame.forme}
-            </span>
+          <h3 className="mt-0.5 text-[1.0625rem] font-medium tracking-[-0.01em]">
+            {frame.nom}
+          </h3>
+          {/* Les espaces encadrant le séparateur sont explicites : sans eux,
+              les lecteurs d'écran annoncent "Noir·carrée" d'un seul tenant. */}
+          <p className="mt-1 text-sm text-[var(--ink-muted)]">
+            {frame.couleur} <span className="text-[var(--ink-subtle)]">·</span>{" "}
+            {frame.forme}
           </p>
         </div>
         <p className="font-medium tabular-nums">{`${frame.prix} €`}</p>

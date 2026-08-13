@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "@phosphor-icons/react/dist/ssr/X";
 import { ArrowsOutCardinal } from "@phosphor-icons/react/dist/ssr/ArrowsOutCardinal";
 import type { Frame } from "@/lib/types";
 import {
   loadJeelizWidget,
+  enfilerOperation,
   messageForError,
   type JeelizErrorLabel,
 } from "./engine/jeelizWidget";
@@ -13,7 +14,7 @@ import {
 type Phase =
   | { name: "chargement" }
   | { name: "actif" }
-  | { name: "erreur"; message: string };
+  | { name: "erreur"; message: string; reessayable: boolean };
 
 export function TryOnOverlay({
   frame,
@@ -27,40 +28,64 @@ export function TryOnOverlay({
   onClose: () => void;
 }) {
   const [phase, setPhase] = useState<Phase>({ name: "chargement" });
-  const startedRef = useRef(false);
+  /* Incrémenté par « Réessayer » : relance l'effet après que l'utilisateur a
+     accordé la caméra, sans lui faire rouvrir l'essayage. */
+  const [essai, setEssai] = useState(0);
 
-  /* Le widget se démarre une seule fois. Les changements de monture passent
-     ensuite par load(), sans réinitialiser la caméra. */
+  /*
+    Le démarrage est mis en file (voir enfilerOperation) plutôt que gardé par
+    une ref : une ref survivrait au démontage de StrictMode et empêcherait
+    définitivement le second montage d'appeler start().
+
+    Le nettoyage détruit le widget, ce qui coupe le flux caméra. Sans cela,
+    la caméra resterait active après la fermeture de l'essayage.
+  */
   useEffect(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
+    let annule = false;
+    let demarre = false;
+    setPhase({ name: "chargement" });
 
-    let cancelled = false;
+    enfilerOperation(async () => {
+      const widget = await loadJeelizWidget();
+      if (annule) return;
 
-    loadJeelizWidget()
-      .then((widget) => {
-        if (cancelled) return;
-        widget.start({
-          sku: frame.sku,
-          isShadow: true,
-          callbackReady: () => {
-            if (!cancelled) setPhase({ name: "actif" });
-          },
-          onError: (label: JeelizErrorLabel) => {
-            if (!cancelled)
-              setPhase({ name: "erreur", message: messageForError(label) });
-          },
-        });
-      })
-      .catch(() => {
-        if (!cancelled)
-          setPhase({ name: "erreur", message: messageForError("LOAD_FAILED") });
+      demarre = true;
+      widget.start({
+        sku: frame.sku,
+        isShadow: true,
+        callbackReady: () => {
+          if (!annule) setPhase({ name: "actif" });
+        },
+        onError: (label: JeelizErrorLabel) => {
+          if (!annule)
+            setPhase({
+              name: "erreur",
+              message: messageForError(label),
+              /* Un refus de caméra se rattrape : l'utilisateur autorise puis
+                 relance. Les autres erreurs ne se résolvent pas d'elles-mêmes. */
+              reessayable: label === "WEBCAM_UNAVAILABLE",
+            });
+        },
       });
+    }).catch(() => {
+      if (!annule)
+        setPhase({
+          name: "erreur",
+          message: messageForError("LOAD_FAILED"),
+          reessayable: true,
+        });
+    });
 
     return () => {
-      cancelled = true;
+      annule = true;
+      if (!demarre) return;
+
+      enfilerOperation(async () => {
+        const widget = await loadJeelizWidget();
+        await widget.destroy();
+      }).catch(() => undefined);
     };
-  }, [frame.sku]);
+  }, [frame.sku, essai]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -77,7 +102,11 @@ export function TryOnOverlay({
     loadJeelizWidget()
       .then((widget) => widget.load(next.sku))
       .catch(() => {
-        setPhase({ name: "erreur", message: messageForError("LOAD_FAILED") });
+        setPhase({
+          name: "erreur",
+          message: messageForError("LOAD_FAILED"),
+          reessayable: true,
+        });
       });
   }
 
@@ -127,13 +156,28 @@ export function TryOnOverlay({
             ) : (
               <>
                 <p className="text-lg text-white">{phase.message}</p>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="mt-6 h-11 rounded-full bg-white px-6 text-[0.9375rem] font-medium text-[var(--color-forest-950)]"
-                >
-                  Revenir à la fiche
-                </button>
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
+                  {phase.reessayable && (
+                    <button
+                      type="button"
+                      onClick={() => setEssai((n) => n + 1)}
+                      className="h-11 rounded-full bg-white px-6 text-[0.9375rem] font-medium text-[var(--color-forest-950)] transition-transform active:translate-y-[1px]"
+                    >
+                      Réessayer
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={`h-11 rounded-full px-6 text-[0.9375rem] font-medium transition-colors ${
+                      phase.reessayable
+                        ? "border border-white/35 text-white hover:border-white/70"
+                        : "bg-white text-[var(--color-forest-950)]"
+                    }`}
+                  >
+                    Revenir à la fiche
+                  </button>
+                </div>
               </>
             )}
           </div>

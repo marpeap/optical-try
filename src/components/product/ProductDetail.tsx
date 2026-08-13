@@ -102,7 +102,12 @@ export function ProductDetail({
             {caracteristiques.map((c) => (
               <div key={c.label}>
                 <dt className="text-xs text-[var(--ink-subtle)]">{c.label}</dt>
-                <dd className="mt-1 font-medium capitalize">{c.valeur}</dd>
+                {/* first-letter et non capitalize : en français seul le premier
+                    mot prend la majuscule ("Acétate et métal", pas
+                    "Acétate Et Métal"). */}
+                <dd className="mt-1 font-medium first-letter:uppercase">
+                  {c.valeur}
+                </dd>
               </div>
             ))}
           </dl>

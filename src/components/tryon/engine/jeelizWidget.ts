@@ -29,8 +29,25 @@ export type JeelizWidget = {
     onError?: (label: JeelizErrorLabel) => void;
   }) => void;
   load: (sku: string) => void;
-  destroy?: () => void;
+  destroy: () => Promise<void>;
 };
+
+/*
+  Le widget est un singleton attaché au DOM par identifiants fixes : deux
+  démarrages simultanés se marcheraient dessus. Les opérations start et
+  destroy passent donc par cette file, ce qui garantit qu'un démarrage
+  n'intervient jamais avant la fin de la destruction précédente.
+
+  Nécessaire dès le développement : StrictMode monte les effets deux fois,
+  produisant une séquence start / destroy / start en quelques millisecondes.
+*/
+let file: Promise<unknown> = Promise.resolve();
+
+export function enfilerOperation<T>(operation: () => Promise<T>): Promise<T> {
+  const suite = file.then(operation, operation);
+  file = suite.catch(() => undefined);
+  return suite;
+}
 
 let loader: Promise<JeelizWidget> | null = null;
 
