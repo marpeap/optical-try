@@ -27,7 +27,7 @@ export function ProductCard({
           aria-hidden
           className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-white/10"
         />
-        <p className="relative text-[2rem] font-semibold leading-none tracking-[-0.03em] text-white/95">
+        <p className="font-display relative text-[2rem] font-semibold leading-none tracking-[-0.03em] text-white/95">
           {frame.nom}
         </p>
       </div>
