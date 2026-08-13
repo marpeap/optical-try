@@ -59,7 +59,9 @@ export function SiteHeader() {
             Alves
           </Link>
 
-          <nav className="hidden flex-1 items-center gap-7 md:flex">
+          {/* Deux entrées seulement : elles tiennent sur une ligne dès 390px,
+              inutile de les cacher derrière un menu sur mobile. */}
+          <nav className="flex flex-1 items-center gap-5 md:gap-7">
             {NAV.map((item) => (
               <Link
                 key={item.href}
@@ -80,7 +82,7 @@ export function SiteHeader() {
           {!surHero && (
             <Link
               href="/catalogue"
-              className="ml-auto inline-flex h-10 items-center rounded-full bg-[var(--accent)] px-5 text-sm font-medium text-[var(--accent-ink)] transition-colors hover:bg-[var(--accent-hover)] md:ml-0"
+              className="ml-auto hidden h-10 items-center rounded-full bg-[var(--accent)] px-5 text-sm font-medium text-[var(--accent-ink)] transition-colors hover:bg-[var(--accent-hover)] sm:inline-flex md:ml-0"
             >
               Voir les montures
             </Link>

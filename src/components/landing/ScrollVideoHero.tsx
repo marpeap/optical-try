@@ -6,8 +6,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const DESKTOP_FRAME_COUNT = 360;
-const MOBILE_FRAME_COUNT = 240;
+/* Doivent rester en phase avec scripts/generate-video-frames.sh. */
+const DESKTOP_FRAME_COUNT = 180;
+const MOBILE_FRAME_COUNT = 120;
 const MOBILE_BREAKPOINT = 768;
 
 /*
@@ -57,18 +58,54 @@ export function ScrollVideoHero() {
 
     const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
     const frameCount = isMobile ? MOBILE_FRAME_COUNT : DESKTOP_FRAME_COUNT;
-    const images: HTMLImageElement[] = [];
+    const images: HTMLImageElement[] = new Array(frameCount);
 
-    for (let i = 0; i < frameCount; i++) {
-      const img = new window.Image();
-      img.src = frameUrl(isMobile, i);
-      images.push(img);
+    /* Chargement progressif : la première image part seule pour que le hero
+       s'affiche tout de suite, les suivantes arrivent en file derrière. Tout
+       demander d'un coup imposerait une quinzaine de mégaoctets au premier
+       rendu et retarderait le LCP. */
+    let annule = false;
+
+    function chargerImage(i: number): Promise<void> {
+      return new Promise((resolve) => {
+        const img = new window.Image();
+        img.onload = () => {
+          images[i] = img;
+          /* Redessine si la frame attendue vient d'arriver. */
+          if (i === currentFrame) drawFrame(i);
+          resolve();
+        };
+        img.onerror = () => resolve();
+        img.src = frameUrl(isMobile, i);
+      });
     }
 
-    /* Recouvre le canvas sans déformer l'image, quel que soit le ratio. */
+    async function chargerSequence() {
+      await chargerImage(0);
+      const PARALLELE = 6;
+      for (let debut = 1; debut < frameCount; debut += PARALLELE) {
+        if (annule) return;
+        await Promise.all(
+          Array.from({ length: Math.min(PARALLELE, frameCount - debut) }, (_, k) =>
+            chargerImage(debut + k)
+          )
+        );
+      }
+    }
+
+    /* Recouvre le canvas sans déformer l'image, quel que soit le ratio.
+       Si la frame visée n'est pas encore arrivée, on affiche la plus proche
+       déjà chargée : le canvas ne se vide jamais pendant le chargement. */
     function drawFrame(index: number) {
-      const img = images[Math.min(Math.max(index, 0), images.length - 1)];
-      if (!img?.complete || !img.naturalWidth || !canvas || !ctx2d) return;
+      const cible = Math.min(Math.max(index, 0), frameCount - 1);
+      let img: HTMLImageElement | undefined;
+      for (let i = cible; i >= 0; i--) {
+        if (images[i]?.complete) {
+          img = images[i];
+          break;
+        }
+      }
+      if (!img?.naturalWidth || !canvas || !ctx2d) return;
 
       const scale = Math.max(
         canvas.width / img.naturalWidth,
@@ -92,15 +129,16 @@ export function ScrollVideoHero() {
     }
 
     let currentFrame = 0;
-    images[0].onload = () => drawFrame(0);
     resize();
     window.addEventListener("resize", resize);
+    chargerSequence();
 
     let trigger: ScrollTrigger | undefined;
 
     if (prefersReduced) {
-      /* Sans mouvement : une image fixe et tous les paliers lisibles. */
-      images[0].complete && drawFrame(0);
+      /* Sans mouvement : la première image suffit, les paliers de texte
+         restent tous lisibles puisqu'ils ne dépendent plus du scroll. */
+      setBeatIndex(0);
     } else {
       const gsapCtx = gsap.context(() => {
         trigger = ScrollTrigger.create({
@@ -122,12 +160,14 @@ export function ScrollVideoHero() {
       }, section);
 
       return () => {
+        annule = true;
         window.removeEventListener("resize", resize);
         gsapCtx.revert();
       };
     }
 
     return () => {
+      annule = true;
       window.removeEventListener("resize", resize);
       trigger?.kill();
     };
