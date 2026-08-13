@@ -12,7 +12,7 @@ vi.mock("@/components/tryon/engine/jeelizWidget", () => ({
     destroy: vi.fn().mockResolvedValue(undefined),
   }),
   enfilerOperation: (operation: () => Promise<unknown>) => operation(),
-  messageForError: () => "Erreur",
+  messageForError: () => ({ texte: "Erreur", reessayable: true }),
 }));
 
 describe("ProductDetail", () => {

@@ -12,9 +12,26 @@
 
 const SCRIPT_SRC = "/vendor/jeeliz/JeelizVTOWidget.js";
 
+/*
+  Libellés relevés dans le build du widget (vendor/jeeliz). La liste dépasse
+  celle de leur documentation : les cas caméra en particulier se déclinent en
+  plusieurs codes qu'il faut distinguer, sans quoi une machine sans webcam
+  reçoit le même message qu'une panne du service.
+*/
 export type JeelizErrorLabel =
   | "WEBCAM_UNAVAILABLE"
+  | "NO_VALID_MEDIASTREAM_FALLBACK_CONSTRAINTS"
+  | "MEDIASTREAMAPI_NOT_FOUND"
+  | "NO_DEVICES_FOUND"
+  | "NODEVICESFOUND"
+  | "VIDEO_NOT_PROVIDED"
+  | "VIDEO_NOTSTARTED"
+  | "VIDEO_NULLSIZE"
+  | "VIDEO_PLAYPROMISEREJECTED"
+  | "GL_INCOMPATIBLE"
   | "INVALID_SKU"
+  | "SKU_NOT_FOUND"
+  | "CANNOT_LOAD_MODEL"
   | "PLACEHOLDER_NULL_WIDTH"
   | "PLACEHOLDER_NULL_HEIGHT"
   | "FATAL";
@@ -85,19 +102,69 @@ export function loadJeelizWidget(): Promise<JeelizWidget> {
   return loader;
 }
 
+export type MessageErreur = { texte: string; reessayable: boolean };
+
 /** Message destiné à l'utilisateur pour chaque code d'erreur du widget. */
-export function messageForError(label: JeelizErrorLabel | "LOAD_FAILED"): string {
+export function messageForError(
+  label: JeelizErrorLabel | "LOAD_FAILED"
+): MessageErreur {
   switch (label) {
     case "WEBCAM_UNAVAILABLE":
-      return "Autorisez l'accès à votre caméra pour essayer cette monture.";
+      return {
+        texte: "Autorisez l'accès à votre caméra pour essayer cette monture.",
+        reessayable: true,
+      };
+
+    /* Aucune caméra exploitable : matériel absent, désactivé au niveau
+       système, ou déjà utilisé par une autre application. Réessayer sans
+       rien changer ne sert à rien, d'où le conseil explicite. */
+    case "NO_VALID_MEDIASTREAM_FALLBACK_CONSTRAINTS":
+    case "NO_DEVICES_FOUND":
+    case "NODEVICESFOUND":
+    case "MEDIASTREAMAPI_NOT_FOUND":
+      return {
+        texte:
+          "Aucune caméra détectée. Vérifiez qu'elle n'est pas désactivée ou utilisée par une autre application.",
+        reessayable: true,
+      };
+
+    case "VIDEO_NOT_PROVIDED":
+    case "VIDEO_NOTSTARTED":
+    case "VIDEO_NULLSIZE":
+    case "VIDEO_PLAYPROMISEREJECTED":
+      return {
+        texte: "Le flux vidéo n'a pas démarré. Réessayez.",
+        reessayable: true,
+      };
+
+    case "GL_INCOMPATIBLE":
+      return {
+        texte:
+          "Votre navigateur ne prend pas en charge l'affichage 3D nécessaire à l'essayage.",
+        reessayable: false,
+      };
+
     case "INVALID_SKU":
-      return "Cette monture n'est pas encore disponible à l'essayage.";
+    case "SKU_NOT_FOUND":
+    case "CANNOT_LOAD_MODEL":
+      return {
+        texte: "Cette monture n'est pas encore disponible à l'essayage.",
+        reessayable: false,
+      };
+
     case "PLACEHOLDER_NULL_WIDTH":
     case "PLACEHOLDER_NULL_HEIGHT":
-      return "L'essayage n'a pas pu s'afficher correctement. Réessayez.";
+      return {
+        texte: "L'essayage n'a pas pu s'afficher correctement. Réessayez.",
+        reessayable: true,
+      };
+
     case "LOAD_FAILED":
     case "FATAL":
     default:
-      return "L'essayage virtuel n'a pas pu démarrer. Réessayez plus tard.";
+      return {
+        texte: "L'essayage virtuel n'a pas pu démarrer. Réessayez plus tard.",
+        reessayable: true,
+      };
   }
 }

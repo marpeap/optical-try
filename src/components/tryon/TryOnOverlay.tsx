@@ -57,23 +57,15 @@ export function TryOnOverlay({
           if (!annule) setPhase({ name: "actif" });
         },
         onError: (label: JeelizErrorLabel) => {
-          if (!annule)
-            setPhase({
-              name: "erreur",
-              message: messageForError(label),
-              /* Un refus de caméra se rattrape : l'utilisateur autorise puis
-                 relance. Les autres erreurs ne se résolvent pas d'elles-mêmes. */
-              reessayable: label === "WEBCAM_UNAVAILABLE",
-            });
+          if (annule) return;
+          const { texte, reessayable } = messageForError(label);
+          setPhase({ name: "erreur", message: texte, reessayable });
         },
       });
     }).catch(() => {
-      if (!annule)
-        setPhase({
-          name: "erreur",
-          message: messageForError("LOAD_FAILED"),
-          reessayable: true,
-        });
+      if (annule) return;
+      const { texte, reessayable } = messageForError("LOAD_FAILED");
+      setPhase({ name: "erreur", message: texte, reessayable });
     });
 
     return () => {
@@ -97,16 +89,41 @@ export function TryOnOverlay({
     };
   }, [onClose]);
 
+  /*
+    Le widget signale certaines pannes caméra par une promesse rejetée non
+    interceptée, en plus de son callback onError. Sans ce filet, la rejection
+    remonte au navigateur (et à l'écran d'erreur de Next.js en développement)
+    alors que l'overlay affiche déjà un message propre.
+
+    L'écouteur ne vit que le temps de l'essayage et ne neutralise que les
+    libellés du widget, pour ne pas masquer les erreurs du reste du site.
+  */
+  useEffect(() => {
+    function onRejet(e: PromiseRejectionEvent) {
+      const raison = e.reason;
+      const libelle = typeof raison === "string" ? raison : raison?.message;
+      if (typeof libelle !== "string" || !/^[A-Z][A-Z_]{5,}$/.test(libelle)) {
+        return;
+      }
+
+      e.preventDefault();
+      const { texte, reessayable } = messageForError(
+        libelle as JeelizErrorLabel
+      );
+      setPhase({ name: "erreur", message: texte, reessayable });
+    }
+
+    window.addEventListener("unhandledrejection", onRejet);
+    return () => window.removeEventListener("unhandledrejection", onRejet);
+  }, []);
+
   function changerMonture(next: Frame) {
     onSelectFrame(next);
     loadJeelizWidget()
       .then((widget) => widget.load(next.sku))
       .catch(() => {
-        setPhase({
-          name: "erreur",
-          message: messageForError("LOAD_FAILED"),
-          reessayable: true,
-        });
+        const { texte, reessayable } = messageForError("LOAD_FAILED");
+        setPhase({ name: "erreur", message: texte, reessayable });
       });
   }
 
