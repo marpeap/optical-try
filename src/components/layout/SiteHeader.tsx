@@ -54,19 +54,21 @@ export function SiteHeader() {
         <div className="mx-auto flex h-full max-w-[1400px] items-center gap-8 px-6">
           <Link
             href="/"
-            className="text-[1.0625rem] font-semibold tracking-[-0.02em]"
+            className="inline-flex h-11 items-center text-[1.0625rem] font-semibold tracking-[-0.02em]"
           >
             Alves
           </Link>
 
           {/* Deux entrées seulement : elles tiennent sur une ligne dès 390px,
               inutile de les cacher derrière un menu sur mobile. */}
-          <nav className="flex flex-1 items-center gap-5 md:gap-7">
+          {/* Les liens occupent toute la hauteur du bandeau : la zone tactile
+              atteint 44px sans changer la taille du texte. */}
+          <nav className="flex flex-1 items-center gap-2 md:gap-4">
             {NAV.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm transition-colors ${
+                className={`inline-flex h-11 items-center rounded-full px-2.5 text-sm transition-colors md:px-3 ${
                   transparent
                     ? "text-white/75 hover:text-white"
                     : "text-[var(--ink-muted)] hover:text-[var(--ink)]"

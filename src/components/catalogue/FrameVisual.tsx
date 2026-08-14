@@ -48,8 +48,12 @@ export function FrameVisual({
 
   return (
     <div
+      /* Les photos produit sont panoramiques : un cadre 4/5 sur mobile
+         laisserait de larges bandes vides au-dessus et en dessous. */
       className={`group/visual relative overflow-hidden rounded-[var(--radius-card)] bg-white ${
-        grandFormat ? "aspect-[4/5] lg:aspect-auto lg:min-h-[560px]" : "aspect-[4/3]"
+        grandFormat
+          ? "aspect-[4/3] sm:aspect-[4/5] lg:aspect-auto lg:min-h-[560px]"
+          : "aspect-[4/3]"
       }`}
     >
       {/* Halo à la teinte de la monture : réchauffe le fond blanc et relie la
@@ -65,11 +69,13 @@ export function FrameVisual({
       {/* Au survol : la monture se soulève et pivote légèrement, comme un
           objet qu'on prend en main. Une vraie rotation sur 360° demanderait
           une prise de vue multi-angles, impossible avec une photo unique. */}
+      {/* Marge intérieure resserrée sur petit écran : la même que sur desktop
+          laisserait la monture flotter au milieu d'un cadre presque vide. */}
       <div
         className={`absolute inset-0 transition-transform duration-500 ease-out motion-reduce:transition-none ${
           grandFormat
-            ? "p-10 md:p-14"
-            : "p-7 group-hover:-translate-y-1.5 group-hover:rotate-[-2.5deg] group-hover:scale-[1.06]"
+            ? "p-5 sm:p-10 md:p-14"
+            : "p-4 sm:p-7 group-hover:-translate-y-1.5 group-hover:rotate-[-2.5deg] group-hover:scale-[1.06]"
         }`}
       >
         <div className="relative h-full w-full">

@@ -38,12 +38,14 @@ export function SiteFooter() {
           {COLUMNS.map((column) => (
             <div key={column.title}>
               <p className="text-sm font-medium">{column.title}</p>
-              <ul className="mt-4 grid gap-2.5">
+              {/* py-2 porte chaque lien à environ 44px de haut : sans cela la
+                  zone tactile ne dépasse pas la hauteur du texte. */}
+              <ul className="mt-2 grid">
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
+                      className="inline-block py-2.5 text-sm text-[var(--ink-muted)] transition-colors hover:text-[var(--ink)]"
                     >
                       {link.label}
                     </Link>

@@ -57,8 +57,11 @@ export function ProductDetail({
         </div>
 
         <div className="lg:pt-6">
-          <nav className="text-sm text-[var(--ink-muted)]">
-            <Link href="/catalogue" className="hover:text-[var(--ink)]">
+          <nav className="flex items-center text-sm text-[var(--ink-muted)]">
+            <Link
+              href="/catalogue"
+              className="inline-flex h-11 items-center pr-1 hover:text-[var(--ink)]"
+            >
               Montures
             </Link>
             <span className="px-2 text-[var(--ink-subtle)]">/</span>
