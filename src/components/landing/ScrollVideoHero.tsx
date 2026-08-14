@@ -7,8 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 /* Doivent rester en phase avec scripts/generate-video-frames.sh. */
-const DESKTOP_FRAME_COUNT = 180;
-const MOBILE_FRAME_COUNT = 120;
+const DESKTOP_FRAME_COUNT = 150;
+const MOBILE_FRAME_COUNT = 100;
 const MOBILE_BREAKPOINT = 768;
 
 /*
@@ -176,12 +176,15 @@ export function ScrollVideoHero() {
   return (
     /* -mt-16 : la vidéo remonte sous le bandeau, qui est transparent ici. */
     <section ref={sectionRef} className="relative -mt-16 h-[320vh]">
-      {/* Repère lu par le bandeau : tant qu'il est à l'écran, la vidéo occupe
-          le cadre et le bandeau reste transparent. */}
+      {/* Repère lu par le bandeau. Il s'arrête à 100dvh du bas, soit exactement
+          la fin de la phase épinglée : au-delà le hero remonte et s'efface, et
+          le bandeau doit redevenir opaque pour que le titre passe derrière lui
+          au lieu de se superposer à la navigation. Le calage par bottom évite
+          de dupliquer la hauteur de la section. */}
       <div
         id="hero-sentinelle"
         aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-x-0 top-0 bottom-[100dvh]"
       />
 
       <div className="sticky top-0 h-[100dvh] overflow-hidden">
@@ -197,24 +200,38 @@ export function ScrollVideoHero() {
 
         <div className="relative mx-auto flex h-full max-w-[1400px] items-center px-6">
           <div className="max-w-xl">
-            {BEATS.map((beat, i) => (
-              <div
-                key={beat.title}
-                aria-hidden={i !== beatIndex}
-                className={`transition-opacity duration-500 ${
-                  i === beatIndex
-                    ? "opacity-100"
-                    : "pointer-events-none absolute opacity-0"
-                }`}
-              >
-                <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.03em] text-white md:text-6xl">
-                  {beat.title}
-                </h1>
-                <p className="mt-5 max-w-md text-lg leading-relaxed text-white/80">
-                  {beat.body}
-                </p>
-              </div>
-            ))}
+            {/* Les paliers sont empilés dans une même cellule de grille : la
+                hauteur du bloc vaut celle du palier le plus haut et ne change
+                jamais. Sortir l'inactif du flux ferait sauter les boutons et
+                laisserait les deux textes se chevaucher pendant le fondu. */}
+            <div className="grid">
+              {BEATS.map((beat, i) => {
+                const Titre = i === 0 ? "h1" : "p";
+                return (
+                  <div
+                    key={beat.title}
+                    aria-hidden={i !== beatIndex}
+                    className={`[grid-area:1/1] transition-opacity duration-500 motion-reduce:transition-none ${
+                      i === beatIndex
+                        ? "opacity-100"
+                        : "pointer-events-none opacity-0"
+                    }`}
+                  >
+                    {/* Un seul h1 par page : les paliers suivants prolongent le
+                        récit sans être des titres de niveau supérieur. */}
+                    {/* pb-1 et interlignage 1.12 : « payez » descend sous la
+                        ligne de base, un interlignage plus serré couperait le
+                        jambage du y. */}
+                    <Titre className="font-display pb-1 text-4xl font-semibold leading-[1.12] tracking-[-0.03em] text-white md:text-6xl">
+                      {beat.title}
+                    </Titre>
+                    <p className="mt-5 max-w-md text-lg leading-relaxed text-white/80">
+                      {beat.body}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
 
             <div className="mt-9 flex flex-wrap gap-3">
               <a
